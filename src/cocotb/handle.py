@@ -991,6 +991,36 @@ class LogicObject(
         # can't use `range` to get length because `range` is for outer-most dimension only
         # and this object needs to support multi-dimensional packed arrays.
         return self._handle.get_num_elems()
+    
+    def __getitem__(self, key:Union[int, slice]):
+        return self.value[key]
+    
+    def __setitem__(self, key:int, value):
+        v = self.value 
+        if isinstance(key, slice):
+            if isinstance(value, int):
+                if value < 0:
+                     new_value = LogicArray.from_signed(value, width=len(v[key]))
+                else:
+                    new_value = LogicArray.from_unsigned(value, width=len(v[key]))
+            elif isinstance(value, (bytes, bytearray)):
+                new_value = LogicArray.from_bytes(value, width=len(v[key]))
+            elif isinstance(value, LogicArray):
+                if len(value) != len(v[key]):
+                    raise OverflowError(f"Assignment array len ({len(value)}) != slice width ({len(v[key])})")
+                new_value = value
+            else: 
+                raise TypeError(
+                    f"Unsupported type for item value assignment: {type(value)} ({value!r})"
+                )
+        elif isinstance(key, int):
+            new_value = value 
+        else:
+            raise KeyError(
+                f"Unsupported type for item key: {type(key)} ({key!r})"
+            )
+        v[key] = new_value
+        self.set(v)
 
 
 class RealObject(ValueObjectBase[float, float]):
