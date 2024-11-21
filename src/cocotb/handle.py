@@ -1000,11 +1000,16 @@ class LogicObject(
         if isinstance(key, slice):
             if isinstance(value, int):
                 if value < 0:
-                     new_value = LogicArray.from_signed(value, width=len(v[key]))
+                    new_value = LogicArray.from_signed(value, width=len(v[key]))
                 else:
                     new_value = LogicArray.from_unsigned(value, width=len(v[key]))
             elif isinstance(value, (bytes, bytearray)):
                 new_value = LogicArray.from_bytes(value, width=len(v[key]))
+            elif isinstance(value, list):
+                if len(value) != len(v[key]):
+                    raise OverflowError(f"Assignment array len ({len(value)}) != slice width ({len(v[key])})")
+                new_value = value
+
             elif isinstance(value, LogicArray):
                 if len(value) != len(v[key]):
                     raise OverflowError(f"Assignment array len ({len(value)}) != slice width ({len(v[key])})")
