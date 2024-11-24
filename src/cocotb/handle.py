@@ -968,7 +968,7 @@ class LogicObject(
             ``sum(v << (d['bits'] * i) for i, v in enumerate(d['values']))`` instead.
         """
         binstr = self._handle.get_signal_val_binstr()
-        return LogicArray._from_handle(binstr)
+        return LogicArray._from_handle(binstr, on_change=lambda newval: self.set(newval))
 
     @value.setter
     def value(self, value: LogicArray) -> None:
